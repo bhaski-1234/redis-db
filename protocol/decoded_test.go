@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestSimpleString(t *testing.T) {
+func TestDecodedSimpleString(t *testing.T) {
 	input := [][]byte{
 		[]byte("+OK\r\n"),
 		[]byte("+Hello World\r\n"),
@@ -24,7 +24,7 @@ func TestSimpleString(t *testing.T) {
 	}
 }
 
-func TestInteger(t *testing.T) {
+func TestDecodedInteger(t *testing.T) {
 	input := [][]byte{
 		[]byte(":12345\r\n"),
 		[]byte(":0\r\n"),
@@ -46,7 +46,7 @@ func TestInteger(t *testing.T) {
 	}
 }
 
-func TestBulkString(t *testing.T) {
+func TestDecodedBulkString(t *testing.T) {
 	input := [][]byte{
 		[]byte("$5\r\nHello\r\n"),
 		[]byte("$0\r\n\r\n"),
@@ -70,7 +70,7 @@ func TestBulkString(t *testing.T) {
 	}
 }
 
-func TestArray(t *testing.T) {
+func TestDecodedArray(t *testing.T) {
 	input := [][]byte{
 		[]byte("*2\r\n$3\r\nfoo\r\n$3\r\nbar\r\n"),
 		[]byte("*3\r\n:1\r\n:2\r\n:3\r\n"),
@@ -98,7 +98,7 @@ func TestArray(t *testing.T) {
 	}
 }
 
-func TestErrorHandling(t *testing.T) {
+func TestDecodedErrorHandling(t *testing.T) {
 	input := [][]byte{
 		[]byte(":NotAnInteger\r\n"),
 		[]byte("*InvalidArray\r\n"),
