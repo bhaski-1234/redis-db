@@ -1,0 +1,118 @@
+package protocol
+
+import (
+	"errors"
+	"github.com/bhaski-1234/redis-db/constant"
+	"strings"
+)
+
+func decodeInteger(data []byte) (int, int, error) {
+	if len(data) < 2 || data[0] != ':' {
+		return 0, 0, errors.New(constant.ErrInvalidRESP)
+	}
+	var value int
+	i := 1
+	sign := 1
+	if i < len(data) && data[i] == '-' {
+		sign = -1
+		i++
+	}
+	for i < len(data) && data[i] != '\r' {
+		if data[i] < '0' || data[i] > '9' {
+			return 0, 0, errors.New(constant.ErrInvalidRESP)
+		}
+		value = value*10 + int(data[i]-'0')
+		i++
+	}
+	return sign * value, i + 2, nil
+}
+
+func decodeBulkString(data []byte) (string, int, error) {
+	if len(data) < 2 || data[0] != '$' {
+		return "", 0, errors.New(constant.ErrInvalidRESP)
+	}
+
+	var length int
+	i := 1
+	for i < len(data) && data[i] != '\r' {
+		if data[i] < '0' || data[i] > '9' {
+			return "", 0, errors.New(constant.ErrInvalidRESP)
+		}
+		length = length*10 + int(data[i]-'0')
+		i++
+	}
+
+	i += 2 // skip \r\n
+	return string(data[i : i+length]), i + length + 2, nil
+}
+
+func decodeSimpleString(data []byte) (string, int, error) {
+	if len(data) < 2 || data[0] != '+' {
+		return "", 0, errors.New(constant.ErrInvalidRESP)
+	}
+	i := 1
+	var builder strings.Builder
+	for i < len(data) && data[i] != '\r' {
+		builder.WriteByte(data[i])
+		i++
+	}
+	return builder.String(), i + 2, nil
+}
+
+func decodeArray(data []byte) ([]interface{}, int, error) {
+	if len(data) < 2 || data[0] != '*' {
+		return nil, 0, errors.New(constant.ErrInvalidRESP)
+	}
+
+	var length int
+	i := 1
+	for i < len(data) && data[i] != '\r' {
+		if data[i] < '0' || data[i] > '9' {
+			return nil, 0, errors.New(constant.ErrInvalidRESP)
+		}
+		length = length*10 + int(data[i]-'0')
+		i++
+	}
+
+	i += 2 // skip \r\n
+	result := make([]interface{}, length)
+	for j := 0; j < length; j++ {
+		item, nextIndex, err := decodeRESP(data[i:])
+		if err != nil {
+			return nil, 0, err
+		}
+		result[j] = item
+		i += nextIndex
+	}
+	return result, i, nil
+}
+
+func decodeError(data []byte) (string, int, error) {
+	if len(data) < 2 || data[0] != '-' {
+		return "", 0, errors.New(constant.ErrInvalidRESP)
+	}
+	i := 1
+	var builder strings.Builder
+	for i < len(data) && data[i] != '\r' {
+		builder.WriteByte(data[i])
+		i++
+	}
+	return builder.String(), i + 2, nil
+}
+
+func decodeRESP(data []byte) (interface{}, int, error) {
+	switch data[0] {
+	case ':':
+		return decodeInteger(data)
+	case '$':
+		return decodeBulkString(data)
+	case '+':
+		return decodeSimpleString(data)
+	case '*':
+		return decodeArray(data)
+	case '-':
+		return decodeError(data)
+	default:
+		return nil, 0, errors.New(constant.ErrInvalidRESP)
+	}
+}
