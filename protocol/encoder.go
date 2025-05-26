@@ -37,7 +37,7 @@ func encodeArray(values []interface{}) []byte {
 		case string:
 			result = append(result, encodeBulkString(v)...)
 		default:
-			//do nothing for unsupported types
+			log.Printf("Warning: Unsupported type %T encountered in encodeArray", value)
 		}
 	}
 	return result
