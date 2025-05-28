@@ -2,11 +2,12 @@ package protocol
 
 import (
 	"errors"
-	"github.com/bhaski-1234/redis-db/constant"
 	"strings"
+
+	"github.com/bhaski-1234/redis-db/constant"
 )
 
-func decodeInteger(data []byte) (int, int, error) {
+func DecodeInteger(data []byte) (int, int, error) {
 	if len(data) < 2 || data[0] != ':' {
 		return 0, 0, errors.New(constant.ErrInvalidRESP)
 	}
@@ -27,7 +28,7 @@ func decodeInteger(data []byte) (int, int, error) {
 	return sign * value, i + 2, nil
 }
 
-func decodeBulkString(data []byte) (string, int, error) {
+func DecodeBulkString(data []byte) (string, int, error) {
 	if len(data) < 2 || data[0] != '$' {
 		return "", 0, errors.New(constant.ErrInvalidRESP)
 	}
@@ -46,7 +47,7 @@ func decodeBulkString(data []byte) (string, int, error) {
 	return string(data[i : i+length]), i + length + 2, nil
 }
 
-func decodeSimpleString(data []byte) (string, int, error) {
+func DecodeSimpleString(data []byte) (string, int, error) {
 	if len(data) < 2 || data[0] != '+' {
 		return "", 0, errors.New(constant.ErrInvalidRESP)
 	}
@@ -59,7 +60,7 @@ func decodeSimpleString(data []byte) (string, int, error) {
 	return builder.String(), i + 2, nil
 }
 
-func decodeArray(data []byte) ([]interface{}, int, error) {
+func DecodeArray(data []byte) ([]interface{}, int, error) {
 	if len(data) < 2 || data[0] != '*' {
 		return nil, 0, errors.New(constant.ErrInvalidRESP)
 	}
@@ -77,7 +78,7 @@ func decodeArray(data []byte) ([]interface{}, int, error) {
 	i += 2 // skip \r\n
 	result := make([]interface{}, length)
 	for j := 0; j < length; j++ {
-		item, nextIndex, err := decodeRESP(data[i:])
+		item, nextIndex, err := DecodeRESP(data[i:])
 		if err != nil {
 			return nil, 0, err
 		}
@@ -87,7 +88,7 @@ func decodeArray(data []byte) ([]interface{}, int, error) {
 	return result, i, nil
 }
 
-func decodeError(data []byte) (string, int, error) {
+func DecodeError(data []byte) (string, int, error) {
 	if len(data) < 2 || data[0] != '-' {
 		return "", 0, errors.New(constant.ErrInvalidRESP)
 	}
@@ -100,18 +101,18 @@ func decodeError(data []byte) (string, int, error) {
 	return builder.String(), i + 2, nil
 }
 
-func decodeRESP(data []byte) (interface{}, int, error) {
+func DecodeRESP(data []byte) (interface{}, int, error) {
 	switch data[0] {
 	case ':':
-		return decodeInteger(data)
+		return DecodeInteger(data)
 	case '$':
-		return decodeBulkString(data)
+		return DecodeBulkString(data)
 	case '+':
-		return decodeSimpleString(data)
+		return DecodeSimpleString(data)
 	case '*':
-		return decodeArray(data)
+		return DecodeArray(data)
 	case '-':
-		return decodeError(data)
+		return DecodeError(data)
 	default:
 		return nil, 0, errors.New(constant.ErrInvalidRESP)
 	}

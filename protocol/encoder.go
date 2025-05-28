@@ -1,8 +1,12 @@
 package protocol
 
-import "strconv"
+import (
+	"fmt"
+	"log"
+	"strconv"
+)
 
-func encodeInteger(value int) []byte {
+func EncodeInteger(value int) []byte {
 	sign := ""
 	if value < 0 {
 		sign = "-"
@@ -11,19 +15,19 @@ func encodeInteger(value int) []byte {
 	return []byte(":" + sign + strconv.Itoa(value) + "\r\n")
 }
 
-func encodeBulkString(value string) []byte {
+func EncodeBulkString(value string) []byte {
 	return []byte("$" + strconv.Itoa(len(value)) + "\r\n" + value + "\r\n")
 }
 
-func encodeSimpleString(value string) []byte {
+func EncodeSimpleString(value string) []byte {
 	return []byte("+" + value + "\r\n")
 }
 
-func encodeError(value string) []byte {
+func EncodeError(value string) []byte {
 	return []byte("-" + value + "\r\n")
 }
 
-func encodeArray(values []interface{}) []byte {
+func EncodeArray(values []interface{}) []byte {
 	if len(values) == 0 {
 		return []byte("*0\r\n")
 	}
@@ -33,12 +37,28 @@ func encodeArray(values []interface{}) []byte {
 	for _, value := range values {
 		switch v := value.(type) {
 		case int:
-			result = append(result, encodeInteger(v)...)
+			result = append(result, EncodeInteger(v)...)
 		case string:
-			result = append(result, encodeBulkString(v)...)
+			result = append(result, EncodeBulkString(v)...)
 		default:
 			log.Printf("Warning: Unsupported type %T encountered in encodeArray", value)
 		}
 	}
 	return result
+}
+
+func EncodeResponse(data interface{}) []byte {
+	switch v := data.(type) {
+	case string:
+		return EncodeSimpleString(v)
+	case int:
+		return EncodeInteger(v)
+	case []interface{}:
+		return EncodeArray(v)
+	case error:
+		return EncodeError(v.Error())
+	default:
+		// Default to bulk string for other types
+		return EncodeBulkString(fmt.Sprintf("%v", v))
+	}
 }

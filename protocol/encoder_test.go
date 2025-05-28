@@ -16,7 +16,7 @@ func TestEncodedBulkString(t *testing.T) {
 	}
 
 	for i, data := range input {
-		result := encodeBulkString(data)
+		result := EncodeBulkString(data)
 		if string(result) != string(output[i]) {
 			t.Errorf("TestEncodedBulkString failed for input %s: expected %s, got %s", data, output[i], result)
 		}
@@ -35,7 +35,7 @@ func TestEncodedSimpleString(t *testing.T) {
 	}
 
 	for i, data := range input {
-		result := encodeSimpleString(data)
+		result := EncodeSimpleString(data)
 		if string(result) != string(output[i]) {
 			t.Errorf("TestEncodedSimpleString failed for input %s: expected %s, got %s", data, output[i], result)
 		}
@@ -56,7 +56,7 @@ func TestEncodedInteger(t *testing.T) {
 	}
 
 	for i, data := range input {
-		result := encodeInteger(data)
+		result := EncodeInteger(data)
 		if string(result) != string(output[i]) {
 			t.Errorf("TestEncodedInteger failed for input %d: expected %s, got %s", data, output[i], result)
 		}
@@ -79,7 +79,7 @@ func TestEncodedArray(t *testing.T) {
 	}
 
 	for i, data := range input {
-		result := encodeArray(data)
+		result := EncodeArray(data)
 		if string(result) != string(output[i]) {
 			t.Errorf("TestEncodedArray failed for input %v: expected %s, got %s", data, output[i], result)
 		}

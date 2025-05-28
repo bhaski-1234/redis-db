@@ -16,7 +16,7 @@ func TestDecodedSimpleString(t *testing.T) {
 	}
 
 	for i, data := range input {
-		result, _, _ := decodeRESP(data)
+		result, _, _ := DecodeRESP(data)
 		resultConv, _ := result.(string)
 		if resultConv != string(output[i]) {
 			t.Errorf("TestSimpleString failed for input %s: expected %s, got %s", data, output[i], resultConv)
@@ -38,7 +38,7 @@ func TestDecodedInteger(t *testing.T) {
 	}
 
 	for i, data := range input {
-		result, _, _ := decodeRESP(data)
+		result, _, _ := DecodeRESP(data)
 		resultConv, _ := result.(int)
 		if resultConv != output[i] {
 			t.Errorf("TestInteger failed for input %s: expected %d, got %d", data, output[i], resultConv)
@@ -62,7 +62,7 @@ func TestDecodedBulkString(t *testing.T) {
 	}
 
 	for i, data := range input {
-		result, _, _ := decodeRESP(data)
+		result, _, _ := DecodeRESP(data)
 		resultConv, _ := result.(string)
 		if resultConv != output[i] {
 			t.Errorf("TestBulkString failed for input %s: expected %s, got %s", data, output[i], resultConv)
@@ -84,7 +84,7 @@ func TestDecodedArray(t *testing.T) {
 	}
 
 	for i, data := range input {
-		result, _, _ := decodeRESP(data)
+		result, _, _ := DecodeRESP(data)
 		resultConv, _ := result.([]interface{})
 		if len(resultConv) != len(output[i]) {
 			t.Errorf("TestArray failed for input %s: expected length %d, got %d", data, len(output[i]), len(resultConv))
@@ -105,7 +105,7 @@ func TestDecodedErrorHandling(t *testing.T) {
 	}
 
 	for _, data := range input {
-		_, _, err := decodeRESP(data)
+		_, _, err := DecodeRESP(data)
 		if err == nil {
 			t.Errorf("Expected error for input %s, but got none", data)
 		}
