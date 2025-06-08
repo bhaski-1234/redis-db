@@ -22,6 +22,10 @@ func NewDispatcher() *Dispatcher {
 	d.Register("PING", command.HandlePing)
 	d.Register("GET", command.HandleGet)
 	d.Register("SET", command.HandleSet)
+	d.Register("DEL", command.HandleDel)
+	d.Register("EXISTS", command.HandleExists)
+	d.Register("TTL", command.HandleTTL)
+	d.Register("SAVE", command.HandleSave)
 
 	return d
 }

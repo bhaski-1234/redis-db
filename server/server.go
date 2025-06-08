@@ -1,14 +1,17 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"net"
+	"os"
 	"sync"
 	"syscall"
 
 	"github.com/bhaski-1234/redis-db/config"
 	"github.com/bhaski-1234/redis-db/internal/processor"
 	"github.com/bhaski-1234/redis-db/protocol"
+	diskstorage "github.com/bhaski-1234/redis-db/storage/diskStorage"
 	"golang.org/x/sys/unix"
 )
 
@@ -17,11 +20,13 @@ type Server struct {
 	listener    net.Listener
 	connections map[int]net.Conn
 	mu          sync.RWMutex
+	diskstorage *diskstorage.DiskStorage
 }
 
 func NewServer() *Server {
 	return &Server{
 		connections: make(map[int]net.Conn),
+		diskstorage: diskstorage.NewDiskStorage(),
 	}
 }
 
@@ -34,6 +39,12 @@ func (s *Server) Start() error {
 	}
 
 	fmt.Printf("Server is running on %s:%d\n", config.Host, config.Port)
+
+	// Load data from disk
+	err = s.diskstorage.Load("dump")
+	if errors.Is(err, os.ErrNotExist) {
+		// Handle the "file not found" case specifically
+	}
 
 	// Create epoll instance
 	s.epollFd, err = unix.EpollCreate1(unix.EPOLL_CLOEXEC)
